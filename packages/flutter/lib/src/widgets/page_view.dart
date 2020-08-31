@@ -333,6 +333,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   final int initialPage;
   double _pageToUseOnStartup;
+  double _Cacheage;
 
   @override
   double get viewportFraction => _viewportFraction;
@@ -408,14 +409,28 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   bool applyViewportDimension(double viewportDimension) {
+    print('applyViewportDimension: [$viewportDimension]oldPixels[$pixels]oldViewportDimensions[${this.viewportDimension}]');
     final double oldViewportDimensions = this.viewportDimension;
     if (viewportDimension == oldViewportDimensions) {
       return true;
     }
     final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
-    final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? _pageToUseOnStartup : getPageFromPixels(oldPixels, oldViewportDimensions);
+    double page;
+    if (oldPixels == null) {
+      page = _pageToUseOnStartup;
+    } else if (oldViewportDimensions == 0.0) {
+      assert(_Cacheage != null);
+      page = _Cacheage;
+    } else {
+      page = getPageFromPixels(oldPixels, oldViewportDimensions);
+    }
+
     final double newPixels = getPixelsFromPage(page);
+    print('applyViewportDimension: newPixels[$newPixels]oldPixels[$oldPixels]page[$page]');
+
+    // cache the page when resize the viewport to zero.
+    _Cacheage = (viewportDimension == 0.0) ? page : null;
 
     if (newPixels != oldPixels) {
       correctPixels(newPixels);

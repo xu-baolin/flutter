@@ -435,7 +435,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
       final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
       return newPosition.minScrollExtent - oldDelta;
     }
-    if (oldPosition.pixels > oldPosition.maxScrollExtent) {
+    if (oldPosition.maxScrollExtent != 0.0 && oldPosition.pixels > oldPosition.maxScrollExtent) {
       final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
       return newPosition.maxScrollExtent + oldDelta;
     }
