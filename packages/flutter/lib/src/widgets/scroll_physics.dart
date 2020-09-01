@@ -431,13 +431,17 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     if (velocity != 0.0 || ((oldPosition.minScrollExtent == newPosition.minScrollExtent) && (oldPosition.maxScrollExtent == newPosition.maxScrollExtent))) {
       return super.adjustPositionForNewDimensions(oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
     }
-    if (oldPosition.pixels < oldPosition.minScrollExtent) {
-      final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
-      return newPosition.minScrollExtent - oldDelta;
-    }
-    if (oldPosition.pixels > oldPosition.maxScrollExtent) {
-      final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
-      return newPosition.maxScrollExtent + oldDelta;
+    // If resize from zero, recover position from cache, so don't try to
+    // maintain the relative overscroll.
+    if (oldPosition.minScrollExtent != 0.0 || oldPosition.maxScrollExtent != 0.0) {
+      if (oldPosition.pixels < oldPosition.minScrollExtent) {
+        final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
+        return newPosition.minScrollExtent - oldDelta;
+      }
+      if (oldPosition.pixels > oldPosition.maxScrollExtent) {
+        final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
+        return newPosition.maxScrollExtent + oldDelta;
+      }
     }
     return newPosition.pixels.clamp(newPosition.minScrollExtent, newPosition.maxScrollExtent) as double;
   }
