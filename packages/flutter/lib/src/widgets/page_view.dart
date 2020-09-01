@@ -333,7 +333,9 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   final int initialPage;
   double _pageToUseOnStartup;
-  double _Cacheage;
+  // Cache the page when resize the viewport to zero.
+  // For use when resize the viewport to non-zero next time.
+  double _cachePage;
 
   @override
   double get viewportFraction => _viewportFraction;
@@ -409,7 +411,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   bool applyViewportDimension(double viewportDimension) {
-    print('applyViewportDimension: [$viewportDimension]oldPixels[$pixels]oldViewportDimensions[${this.viewportDimension}]');
     final double oldViewportDimensions = this.viewportDimension;
     if (viewportDimension == oldViewportDimensions) {
       return true;
@@ -420,17 +421,18 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     if (oldPixels == null) {
       page = _pageToUseOnStartup;
     } else if (oldViewportDimensions == 0.0) {
-      assert(_Cacheage != null);
-      page = _Cacheage;
+      // If resize frome zero, we shoule use the _cachePage to recover the state.
+      assert(_cachePage != null);
+      page = _cachePage;
     } else {
       page = getPageFromPixels(oldPixels, oldViewportDimensions);
     }
 
     final double newPixels = getPixelsFromPage(page);
-    print('applyViewportDimension: newPixels[$newPixels]oldPixels[$oldPixels]page[$page]');
 
-    // cache the page when resize the viewport to zero.
-    _Cacheage = (viewportDimension == 0.0) ? page : null;
+    // Cache the page when resize the viewport to zero.
+    // For use when resize the viewport to non-zero next time.
+    _cachePage = (viewportDimension == 0.0) ? page : null;
 
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
