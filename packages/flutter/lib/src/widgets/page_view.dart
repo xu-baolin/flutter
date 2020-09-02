@@ -333,9 +333,10 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   final int initialPage;
   double _pageToUseOnStartup;
-  // Cache the page when resize the viewport to zero.
-  // For use when resize the viewport to non-zero next time.
-  double _cachePage;
+  // When the viewport has a zero-size, the `page` can not
+  // be got by `getPageFromPixels`, so we need to cache the page
+  // for use when resizing the viewport to non-zero next time.
+  double _cachedPage;
 
   @override
   double get viewportFraction => _viewportFraction;
@@ -421,9 +422,9 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     if (oldPixels == null) {
       page = _pageToUseOnStartup;
     } else if (oldViewportDimensions == 0.0) {
-      // If resize from zero, we should use the _cachePage to recover the state.
-      assert(_cachePage != null);
-      page = _cachePage;
+      // If resize from zero, we should use the _cachedPage to recover the state.
+      assert(_cachedPage != null);
+      page = _cachedPage;
     } else {
       page = getPageFromPixels(oldPixels, oldViewportDimensions);
     }
@@ -431,8 +432,8 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     final double newPixels = getPixelsFromPage(page);
 
     // Cache the page when resize the viewport to zero.
-    // For use when resize the viewport to non-zero next time.
-    _cachePage = (viewportDimension == 0.0) ? page : null;
+    // For use when resizing the viewport to non-zero next time.
+    _cachedPage = (viewportDimension == 0.0) ? page : null;
 
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
