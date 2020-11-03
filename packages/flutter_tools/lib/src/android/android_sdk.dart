@@ -19,6 +19,9 @@ import 'android_studio.dart';
 const String kAndroidHome = 'ANDROID_HOME';
 const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
 
+final RegExp _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
+final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
+
 // Android SDK layout:
 
 // $ANDROID_SDK_ROOT/platform-tools/adb
@@ -32,77 +35,6 @@ const String kAndroidSdkRoot = 'ANDROID_SDK_ROOT';
 // $ANDROID_SDK_ROOT/platforms/android-22/android.jar
 // $ANDROID_SDK_ROOT/platforms/android-23/android.jar
 // $ANDROID_SDK_ROOT/platforms/android-N/android.jar
-
-final RegExp _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
-final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
-
-/// The minimum Android SDK version we support.
-const int minimumAndroidSdkVersion = 25;
-
-/// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
-/// This should be used over accessing androidSdk.adbPath directly because it
-/// will work for those users who have Android Platform Tools installed but
-/// not the full SDK.
-String getAdbPath([ AndroidSdk existingSdk ]) {
-  if (existingSdk?.adbPath != null) {
-    return existingSdk.adbPath;
-  }
-
-  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-
-  if (sdk?.latestVersion == null) {
-    return globals.os.which('adb')?.path;
-  } else {
-    return sdk?.adbPath;
-  }
-}
-
-/// Locate 'emulator'. Prefer to use one from an Android SDK, if we can locate that.
-/// This should be used over accessing androidSdk.emulatorPath directly because it
-/// will work for those users who have Android Tools installed but
-/// not the full SDK.
-String getEmulatorPath([ AndroidSdk existingSdk ]) {
-  return existingSdk?.emulatorPath ??
-    AndroidSdk.locateAndroidSdk()?.emulatorPath;
-}
-
-/// Locate the path for storing AVD emulator images. Returns null if none found.
-String getAvdPath() {
-
-  final List<String> searchPaths = <String>[
-    globals.platform.environment['ANDROID_AVD_HOME'],
-    if (globals.platform.environment['HOME'] != null)
-      globals.fs.path.join(globals.platform.environment['HOME'], '.android', 'avd'),
-  ];
-
-
-  if (globals.platform.isWindows) {
-    final String homeDrive = globals.platform.environment['HOMEDRIVE'];
-    final String homePath = globals.platform.environment['HOMEPATH'];
-
-    if (homeDrive != null && homePath != null) {
-      // Can't use path.join for HOMEDRIVE/HOMEPATH
-      // https://github.com/dart-lang/path/issues/37
-      final String home = homeDrive + homePath;
-      searchPaths.add(globals.fs.path.join(home, '.android', 'avd'));
-    }
-  }
-
-  return searchPaths.where((String p) => p != null).firstWhere(
-    (String p) => globals.fs.directory(p).existsSync(),
-    orElse: () => null,
-  );
-}
-
-/// Locate 'avdmanager'. Prefer to use one from an Android SDK, if we can locate that.
-/// This should be used over accessing androidSdk.avdManagerPath directly because it
-/// will work for those users who have Android Tools installed but
-/// not the full SDK.
-String getAvdManagerPath([ AndroidSdk existingSdk ]) {
-  return existingSdk?.avdManagerPath ??
-    AndroidSdk.locateAndroidSdk()?.avdManagerPath;
-}
-
 class AndroidSdk {
   AndroidSdk(this.directory) {
     reinitialize();
@@ -240,6 +172,32 @@ class AndroidSdk {
 
   String get avdManagerPath => getAvdManagerPath();
 
+  /// Locate the path for storing AVD emulator images. Returns null if none found.
+  String getAvdPath() {
+    final List<String> searchPaths = <String>[
+      globals.platform.environment['ANDROID_AVD_HOME'],
+      if (globals.platform.environment['HOME'] != null)
+        globals.fs.path.join(globals.platform.environment['HOME'], '.android', 'avd'),
+    ];
+
+    if (globals.platform.isWindows) {
+      final String homeDrive = globals.platform.environment['HOMEDRIVE'];
+      final String homePath = globals.platform.environment['HOMEPATH'];
+
+      if (homeDrive != null && homePath != null) {
+        // Can't use path.join for HOMEDRIVE/HOMEPATH
+        // https://github.com/dart-lang/path/issues/37
+        final String home = homeDrive + homePath;
+        searchPaths.add(globals.fs.path.join(home, '.android', 'avd'));
+      }
+    }
+
+    return searchPaths.where((String p) => p != null).firstWhere(
+      (String p) => globals.fs.directory(p).existsSync(),
+      orElse: () => null,
+    );
+  }
+
   Directory get _platformsDir => globals.fs.directory(globals.fs.path.join(directory, 'platforms'));
 
   Iterable<Directory> get _platforms {
@@ -365,6 +323,7 @@ class AndroidSdk {
         sdkLevel: platformVersion,
         platformName: platformName,
         buildToolsVersion: buildToolsVersion,
+        fileSystem: globals.fs,
       );
     }).where((AndroidSdkVersion version) => version != null).toList();
 
@@ -412,7 +371,7 @@ class AndroidSdk {
     // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
     if (platform.isMacOS) {
       try {
-        final String javaHomeOutput = processUtils.runSync(
+        final String javaHomeOutput = globals.processUtils.runSync(
           <String>['/usr/libexec/java_home', '-v', '1.8'],
           throwOnError: true,
           hideStdout: true,
@@ -457,7 +416,7 @@ class AndroidSdk {
     if (!globals.processManager.canRun(sdkManagerPath)) {
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
     }
-    final RunResult result = processUtils.runSync(
+    final RunResult result = globals.processUtils.runSync(
       <String>[sdkManagerPath, '--version'],
       environment: sdkManagerEnv,
     );
@@ -478,19 +437,29 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     @required this.sdkLevel,
     @required this.platformName,
     @required this.buildToolsVersion,
+    @required FileSystem fileSystem,
   }) : assert(sdkLevel != null),
        assert(platformName != null),
-       assert(buildToolsVersion != null);
+       assert(buildToolsVersion != null),
+       _fileSystem = fileSystem;
 
   final AndroidSdk sdk;
   final int sdkLevel;
   final String platformName;
   final Version buildToolsVersion;
 
+  final FileSystem _fileSystem;
+
   String get buildToolsVersionName => buildToolsVersion.toString();
 
   String get androidJarPath => getPlatformsPath('android.jar');
 
+  /// Return the path to the android application package tool.
+  ///
+  /// This is used to dump the xml in order to launch built android applications.
+  ///
+  /// See also:
+  ///   * [AndroidApk.fromApk], which depends on this to determine application identifiers.
   String get aaptPath => getBuildToolsPath('aapt');
 
   List<String> validateSdkWellFormed() {
@@ -506,11 +475,11 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   }
 
   String getPlatformsPath(String itemName) {
-    return globals.fs.path.join(sdk.directory, 'platforms', platformName, itemName);
+    return _fileSystem.path.join(sdk.directory, 'platforms', platformName, itemName);
   }
 
   String getBuildToolsPath(String binaryName) {
-    return globals.fs.path.join(sdk.directory, 'build-tools', buildToolsVersionName, binaryName);
+    return _fileSystem.path.join(sdk.directory, 'build-tools', buildToolsVersionName, binaryName);
   }
 
   @override
@@ -520,7 +489,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersionName]';
 
   String _exists(String path) {
-    if (!globals.fs.isFileSync(path)) {
+    if (!_fileSystem.isFileSync(path)) {
       return 'Android SDK file not found: $path.';
     }
     return null;

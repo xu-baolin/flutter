@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 
 import '../test_utils.dart';
@@ -16,18 +12,22 @@ class GenL10nProject extends Project {
   @override
   Future<void> setUpIn(Directory dir, {
     bool useDeferredLoading = false,
+    bool useSyntheticPackage = false,
   }) {
     this.dir = dir;
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), appEs);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_es_419.arb'), appEs419);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
-    writeFile(globals.fs.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
-    writeFile(globals.fs.path.join(dir.path, 'l10n.yaml'), l10nYaml(useDeferredLoading: useDeferredLoading));
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_GB.arb'), appEnGb);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es.arb'), appEs);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_es_419.arb'), appEs419);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh.arb'), appZh);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant.arb'), appZhHant);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hans.arb'), appZhHans);
+    writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_zh_Hant_TW.arb'), appZhHantTw);
+    writeFile(fileSystem.path.join(dir.path, 'l10n.yaml'), l10nYaml(
+      useDeferredLoading: useDeferredLoading,
+      useSyntheticPackage: useSyntheticPackage,
+    ));
     return super.setUpIn(dir);
   }
 
@@ -43,7 +43,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: 0.16.1
-  intl_translation: 0.17.8
 ''';
 
   @override
@@ -138,6 +137,10 @@ class Home extends StatelessWidget {
             // Should use the fallback language, in this case,
             // "Hello 世界" should be displayed.
             results.add(AppLocalizations.of(context).hello("世界"));
+            // helloCost is tested in 'zh' because 'es' currency format contains a
+            // non-breaking space character (U+00A0), which if removed,
+            // makes it hard to decipher why the test is failing.
+            results.add(AppLocalizations.of(context).helloCost("价钱", 123));
           },
         ),
         LocaleBuilder(
@@ -173,6 +176,7 @@ class Home extends StatelessWidget {
             results.addAll(<String>[
               '${localizations.helloWorld}',
               '${localizations.helloNewlineWorld}',
+              '${localizations.testDollarSign}',
               '${localizations.hello("World")}',
               '${localizations.greeting("Hello", "World")}',
               '${localizations.helloWorldOn(DateTime(1960))}',
@@ -211,13 +215,16 @@ class Home extends StatelessWidget {
             results.addAll(<String>[
               '${localizations.helloWorld}',
               '${localizations.helloNewlineWorld}',
+              '${localizations.testDollarSign}',
               '${localizations.hello("Mundo")}',
               '${localizations.greeting("Hola", "Mundo")}',
               '${localizations.helloWorldOn(DateTime(1960))}',
               '${localizations.helloOn("world argument", DateTime(1960), DateTime(1960))}',
               '${localizations.helloWorldDuring(DateTime(1960), DateTime(2020))}',
               '${localizations.helloFor(123)}',
-              '${localizations.helloCost("el precio", 123)}',
+              // helloCost is tested in 'zh' because 'es' currency format contains a
+              // non-breaking space character (U+00A0), which if removed,
+              // makes it hard to decipher why the test is failing.
               '${localizations.helloWorlds(0)}',
               '${localizations.helloWorlds(1)}',
               '${localizations.helloWorlds(2)}',
@@ -298,6 +305,11 @@ void main() {
   "helloNewlineWorld": "Hello \n World",
   "@helloNewlineWorld": {
     "description": "The JSON decoder should convert backslash-n to a newline character in the generated Dart string."
+  },
+
+  "testDollarSign": "Hello $ World",
+  "@testDollarSign": {
+    "description": "The generated Dart String should handle the dollar sign correctly."
   },
 
   "hello": "Hello {world}",
@@ -508,13 +520,13 @@ void main() {
   "helloWorld": "ES - Hello world",
   "helloWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello World} =2{ES - Hello two worlds} few{ES - Hello {count} worlds} many{ES - Hello all {count} worlds} other{ES - Hello other {count} worlds}}",
   "helloNewlineWorld": "ES - Hello \n World",
+  "testDollarSign": "ES - Hola $ Mundo",
   "hello": "ES - Hello {world}",
   "greeting": "ES - {hello} {world}",
   "helloWorldOn": "ES - Hello World on {date}",
   "helloWorldDuring": "ES - Hello World from {startDate} to {endDate}",
   "helloOn": "ES - Hello {world} on {date} at {time}",
   "helloFor": "ES - Hello for {value}",
-  "helloCost": "ES - Hello for {price} {value}",
   "helloAdjectiveWorlds": "{count,plural, =0{ES - Hello} =1{ES - Hello {adjective} World} =2{ES - Hello two {adjective} worlds} other{ES - Hello other {count} {adjective} worlds}}",
   "helloWorldsOn": "{count,plural, =0{ES - Hello on {date}} =1{ES - Hello World, on {date}} =2{ES - Hello two worlds, on {date}} other{ES - Hello other {count} worlds, on {date}}}",
   "helloWorldPopulation": "{ES - count,plural, =1{ES - Hello World of {population} citizens} =2{ES - Hello two worlds with {population} total citizens} many{ES - Hello all {count} worlds, with a total of {population} citizens} other{ES - Hello other {count} worlds, with a total of {population} citizens}}",
@@ -541,7 +553,8 @@ void main() {
 {
   "@@locale": "zh",
   "helloWorld": "你好世界",
-  "helloWorlds": "{count,plural, =0{你好} =1{你好世界} other{你好{count}个其他世界}}"
+  "helloWorlds": "{count,plural, =0{你好} =1{你好世界} other{你好{count}个其他世界}}",
+  "helloCost": "zh - Hello for {price} {value}"
 }
 ''';
 
@@ -568,12 +581,18 @@ void main() {
 
   String l10nYaml({
     @required bool useDeferredLoading,
+    @required bool useSyntheticPackage,
   }) {
+    String l10nYamlString = '';
+
     if (useDeferredLoading) {
-      return r'''
-use-deferred-loading: false
-      ''';
+      l10nYamlString += 'use-deferred-loading: true\n';
     }
-    return '';
+
+    if (!useSyntheticPackage) {
+      l10nYamlString += 'synthetic-package: false\n';
+    }
+
+    return l10nYamlString;
   }
 }

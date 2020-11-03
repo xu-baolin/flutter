@@ -4,8 +4,7 @@
 
 // See //dev/devicelab/bin/tasks/flutter_gallery__image_cache_memory.dart
 
-import 'dart:async';
-
+// @dart = 2.9
 import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';

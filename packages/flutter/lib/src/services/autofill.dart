@@ -613,7 +613,7 @@ class AutofillHints {
   ///
   /// This hint will be translated to the below values on different platforms:
   ///
-  /// * Android: [AUTOFILL_HINT_NEW_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_NEW_USERNAME).
+  /// * Android: [AUTOFILL_HINT_USERNAME](https://developer.android.com/reference/androidx/autofill/HintConstants#AUTOFILL_HINT_USERNAME).
   /// * iOS: [username](https://developer.apple.com/documentation/uikit/uitextcontenttype).
   /// * web: ["username"](https://www.w3.org/TR/html52/sec-forms.html#autofilling-form-controls-the-autocomplete-attribute).
   /// * Otherwise, the hint string will be used as-is.
@@ -647,7 +647,7 @@ class AutofillConfiguration {
   ///
   /// Must not be null or empty.
   ///
-  /// {@template flutter.services.autofill.autofillHints}
+  /// {@template flutter.services.AutofillConfiguration.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
   /// autofill service. The common values of hint strings can be found in
   /// [AutofillHints], as well as their availability on different platforms.
@@ -728,7 +728,7 @@ abstract class AutofillClient {
 
 /// An ordered group within which [AutofillClient]s are logically connected.
 ///
-/// {@template flutter.services.autofill.AutofillScope}
+/// {@template flutter.services.AutofillScope}
 /// [AutofillClient]s within the same [AutofillScope] are isolated from other
 /// input fields during autofill. That is, when an autofillable [TextInputClient]
 /// gains focus, only the [AutofillClient]s within the same [AutofillScope] will

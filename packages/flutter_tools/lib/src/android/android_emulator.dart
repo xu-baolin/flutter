@@ -14,7 +14,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
@@ -56,7 +55,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
   /// Return the list of available emulator AVDs.
   Future<List<AndroidEmulator>> _getEmulatorAvds() async {
-    final String emulatorPath = getEmulatorPath(_androidSdk);
+    final String emulatorPath = _androidSdk?.emulatorPath;
     if (emulatorPath == null) {
       return <AndroidEmulator>[];
     }
@@ -81,7 +80,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 
   AndroidEmulator _loadEmulatorInfo(String id) {
     id = id.trim();
-    final String avdPath = getAvdPath();
+    final String avdPath = _androidSdk.getAvdPath();
     final AndroidEmulator androidEmulatorWithoutProperties = AndroidEmulator(
       id,
       processManager: _processManager,
@@ -150,7 +149,7 @@ class AndroidEmulator extends Emulator {
   @override
   Future<void> launch() async {
     final Process process = await _processUtils.start(
-      <String>[getEmulatorPath(_androidSdk), '-avd', id],
+      <String>[_androidSdk.emulatorPath, '-avd', id],
     );
 
     // Record output from the emulator process.
@@ -164,7 +163,7 @@ class AndroidEmulator extends Emulator {
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen(stderrList.add);
-    final Future<void> stdioFuture = waitGroup<void>(<Future<void>>[
+    final Future<void> stdioFuture = Future.wait<void>(<Future<void>>[
       stdoutSubscription.asFuture<void>(),
       stderrSubscription.asFuture<void>(),
     ]);

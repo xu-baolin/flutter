@@ -56,7 +56,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   final int metaState;
 
   @override
-  String get keyLabel => key;
+  String get keyLabel => key == 'Unidentified' ? '' : key;
 
   @override
   PhysicalKeyboardKey get physicalKey {
@@ -110,7 +110,6 @@ class RawKeyEventDataWeb extends RawKeyEventData {
         return metaState & modifierScrollLock != 0;
       case ModifierKey.functionModifier:
       case ModifierKey.symbolModifier:
-      default:
         // On Web, the browser doesn't report the state of the FN and SYM modifiers.
         return false;
     }

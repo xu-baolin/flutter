@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
@@ -118,7 +117,7 @@ abstract class BindingBase {
   /// Implementations of this method must call their superclass
   /// implementation.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   ///
   /// See also:
   ///
@@ -311,7 +310,7 @@ abstract class BindingBase {
   ///
   /// Calls the `callback` callback when the service extension is called.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerSignalServiceExtension({
     required String name,
@@ -341,7 +340,7 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerBoolServiceExtension({
     required String name,
@@ -375,7 +374,7 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerNumericServiceExtension({
     required String name,
@@ -437,7 +436,7 @@ abstract class BindingBase {
   /// Calls the `setter` callback with the new value when the
   /// service extension method is called with a new value.
   ///
-  /// {@macro flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerStringServiceExtension({
     required String name,
@@ -471,7 +470,7 @@ abstract class BindingBase {
   ///
   /// The returned map will be mutated.
   ///
-  /// {@template flutter.foundation.bindingBase.registerServiceExtension}
+  /// {@template flutter.foundation.BindingBase.registerServiceExtension}
   /// A registered service extension can only be activated if the vm-service
   /// is included in the build, which only happens in debug and profile mode.
   /// Although a service extension cannot be used in release mode its code may
@@ -540,7 +539,7 @@ abstract class BindingBase {
         return Future<void>.delayed(Duration.zero);
       });
 
-      dynamic caughtException;
+      Object? caughtException;
       StackTrace? caughtStack;
       late Map<String, dynamic> result;
       try {

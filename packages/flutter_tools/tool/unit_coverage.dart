@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 2.9
+
 import 'dart:io';
 
 /// Produces a per-library coverage summary when fed an lcov file, sorted by
@@ -38,10 +40,16 @@ void main(List<String> args) {
     final double rightPercent = right.testedLines / right.totalLines;
     return leftPercent.compareTo(rightPercent);
   });
+  double overallNumerator = 0;
+  double overallDenominator = 0;
+  print('% | tested | total');
   for (final Coverage coverage in coverages) {
+    overallNumerator += coverage.testedLines;
+    overallDenominator += coverage.totalLines;
     final String coveragePercent = (coverage.testedLines / coverage.totalLines * 100).toStringAsFixed(2);
-    print('${coverage.library}: $coveragePercent%');
+    print('${coverage.library}: $coveragePercent% | ${coverage.testedLines} | ${coverage.totalLines}');
   }
+  print('OVERALL: ${overallNumerator/overallDenominator}');
 }
 
 class Coverage {
