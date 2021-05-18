@@ -948,93 +948,87 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _maybeTriggerScrollbar();
-  }
-
   // Waits one frame and cause an empty scroll event (zero delta pixels).
   //
   // This allows the thumb to show immediately when isAlwaysShown is true.
   // A scroll event is required in order to paint the thumb.
   void _maybeTriggerScrollbar() {
+    if (!showScrollbar)
+      return;
     WidgetsBinding.instance!.addPostFrameCallback((Duration duration) {
-      if (showScrollbar) {
-        _fadeoutTimer?.cancel();
-        // Wait one frame and cause an empty scroll event.  This allows the
-        // thumb to show immediately when isAlwaysShown is true. A scroll
-        // event is required in order to paint the thumb.
-        final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
-        final bool tryPrimary = widget.controller == null;
-        final String controllerForError = tryPrimary
+      _fadeoutTimer?.cancel();
+      // Wait one frame and cause an empty scroll event.  This allows the
+      // thumb to show immediately when isAlwaysShown is true. A scroll
+      // event is required in order to paint the thumb.
+      final ScrollController? scrollController = widget.controller ?? PrimaryScrollController.of(context);
+      final bool tryPrimary = widget.controller == null;
+      final String controllerForError = tryPrimary
           ? 'provided ScrollController'
           : 'PrimaryScrollController';
-        assert(
-          scrollController != null,
-          'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
+      assert(
+      scrollController != null,
+      'A ScrollController is required when Scrollbar.isAlwaysShown is true. '
           '${tryPrimary ? 'The Scrollbar was not provided a ScrollController, '
           'and attempted to use the PrimaryScrollController, but none was found.' :''}',
-        );
-        assert (() {
-          if (!scrollController!.hasClients) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary(
-                'The Scrollbar\'s ScrollController has no ScrollPosition attached.',
-              ),
-              ErrorDescription(
-                'A Scrollbar cannot be painted without a ScrollPosition. ',
-              ),
-              ErrorHint(
-                'The Scrollbar attempted to use the $controllerForError. This '
-                'ScrollController should be associated with the ScrollView that '
-                'the Scrollbar is being applied to. '
-                '${tryPrimary
+      );
+      assert (() {
+        if (!scrollController!.hasClients) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'The Scrollbar\'s ScrollController has no ScrollPosition attached.',
+            ),
+            ErrorDescription(
+              'A Scrollbar cannot be painted without a ScrollPosition. ',
+            ),
+            ErrorHint(
+              'The Scrollbar attempted to use the $controllerForError. This '
+                  'ScrollController should be associated with the ScrollView that '
+                  'the Scrollbar is being applied to. '
+                  '${tryPrimary
                   ? 'A ScrollView with an Axis.vertical '
-                    'ScrollDirection will automatically use the '
-                    'PrimaryScrollController if the user has not provided a '
-                    'ScrollController, but a ScrollDirection of Axis.horizontal will '
-                    'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
-                    'to true for the Scrollable widget.'
+                  'ScrollDirection will automatically use the '
+                  'PrimaryScrollController if the user has not provided a '
+                  'ScrollController, but a ScrollDirection of Axis.horizontal will '
+                  'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
+                  'to true for the Scrollable widget.'
                   : 'When providing your own ScrollController, ensure both the '
-                    'Scrollbar and the Scrollable widget use the same one.'
-                }',
-              ),
-            ]);
-          }
-          return true;
-        }());
-        assert (() {
-          try {
-            scrollController!.position;
-          } catch (_) {
-            throw FlutterError.fromParts(<DiagnosticsNode>[
-              ErrorSummary(
-                'The $controllerForError is currently attached to more than one '
-                'ScrollPosition.',
-              ),
-              ErrorDescription(
-                'The Scrollbar requires a single ScrollPosition in order to be painted.',
-              ),
-              ErrorHint(
-                'When Scrollbar.isAlwaysShown is true, the associated Scrollable '
-                'widgets must have unique ScrollControllers. '
-                '${tryPrimary
+                  'Scrollbar and the Scrollable widget use the same one.'
+              }',
+            ),
+          ]);
+        }
+        return true;
+      }());
+      assert (() {
+        try {
+          scrollController!.position;
+        } catch (_) {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary(
+              'The $controllerForError is currently attached to more than one '
+                  'ScrollPosition.',
+            ),
+            ErrorDescription(
+              'The Scrollbar requires a single ScrollPosition in order to be painted.',
+            ),
+            ErrorHint(
+              'When Scrollbar.isAlwaysShown is true, the associated Scrollable '
+                  'widgets must have unique ScrollControllers. '
+                  '${tryPrimary
                   ? 'The PrimaryScrollController is used by default for '
-                    'ScrollViews with an Axis.vertical ScrollDirection, '
-                    'unless the ScrollView has been provided its own '
-                    'ScrollController. More than one Scrollable may have tried '
-                    'to use the PrimaryScrollController of the current context.'
+                  'ScrollViews with an Axis.vertical ScrollDirection, '
+                  'unless the ScrollView has been provided its own '
+                  'ScrollController. More than one Scrollable may have tried '
+                  'to use the PrimaryScrollController of the current context.'
                   : 'The provided ScrollController must be unique to a '
-                    'Scrollable widget.'
-                }',
-              ),
-            ]);
-          }
-          return true;
-        }());
-        scrollController!.position.didUpdateScrollPositionBy(0);
-      }
+                  'Scrollable widget.'
+              }',
+            ),
+          ]);
+        }
+        return true;
+      }());
+      scrollController!.position.didUpdateScrollPositionBy(0);
     });
   }
 
