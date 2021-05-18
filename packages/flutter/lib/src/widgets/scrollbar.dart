@@ -291,7 +291,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         _lastAxisDirection == axisDirection)
       return;
 
-    ScrollMetrics? oldMetrics = _lastMetrics;
+    final ScrollMetrics? oldMetrics = _lastMetrics;
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
 
