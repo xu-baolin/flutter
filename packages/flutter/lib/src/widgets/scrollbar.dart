@@ -987,7 +987,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         if (!scrollController!.hasClients) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
-              'The Scrollbar\'s ScrollController has no ScrollPosition attached.',
+              "The Scrollbar's ScrollController has no ScrollPosition attached.",
             ),
             ErrorDescription(
               'A Scrollbar cannot be painted without a ScrollPosition. ',
@@ -997,14 +997,14 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               'ScrollController should be associated with the ScrollView that '
               'the Scrollbar is being applied to. '
               '${tryPrimary
-              ? 'A ScrollView with an Axis.vertical '
-                'ScrollDirection will automatically use the '
-                'PrimaryScrollController if the user has not provided a '
-                'ScrollController, but a ScrollDirection of Axis.horizontal will '
-                'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
-                'to true for the Scrollable widget.'
-              : 'When providing your own ScrollController, ensure both the '
-                'Scrollbar and the Scrollable widget use the same one.'
+                ? 'A ScrollView with an Axis.vertical '
+                  'ScrollDirection will automatically use the '
+                  'PrimaryScrollController if the user has not provided a '
+                  'ScrollController, but a ScrollDirection of Axis.horizontal will '
+                  'not. To use the PrimaryScrollController explicitly, set ScrollView.primary '
+                  'to true for the Scrollable widget.'
+                : 'When providing your own ScrollController, ensure both the '
+                  'Scrollbar and the Scrollable widget use the same one.'
               }',
             ),
           ]);
@@ -1027,13 +1027,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
               'When Scrollbar.isAlwaysShown is true, the associated Scrollable '
               'widgets must have unique ScrollControllers. '
               '${tryPrimary
-              ? 'The PrimaryScrollController is used by default for '
-                'ScrollViews with an Axis.vertical ScrollDirection, '
-                'unless the ScrollView has been provided its own '
-                'ScrollController. More than one Scrollable may have tried '
-                'to use the PrimaryScrollController of the current context.'
-              : 'The provided ScrollController must be unique to a '
-                'Scrollable widget.'
+                ? 'The PrimaryScrollController is used by default for '
+                  'ScrollViews with an Axis.vertical ScrollDirection, '
+                  'unless the ScrollView has been provided its own '
+                  'ScrollController. More than one Scrollable may have tried '
+                  'to use the PrimaryScrollController of the current context.'
+                : 'The provided ScrollController must be unique to a '
+                  'Scrollable widget.'
               }',
             ),
           ]);

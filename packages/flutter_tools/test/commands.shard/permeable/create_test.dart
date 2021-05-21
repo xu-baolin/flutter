@@ -36,7 +36,7 @@ import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String _kNoPlatformsMessage = 'You\'ve created a plugin project that doesn\'t yet support any platforms.\n';
+const String _kNoPlatformsMessage = "You've created a plugin project that doesn't yet support any platforms.\n";
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
@@ -2661,8 +2661,11 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     return '$location: $lintName';
   }
   final List<String> errors = const LineSplitter().convert(exec.stdout.toString())
-      .where((String line) => line.trim().isNotEmpty && !line.startsWith('Analyzing'))
-      .map(lineParser).toList();
+      .where((String line) {
+        return line.trim().isNotEmpty &&
+            !line.startsWith('Analyzing') &&
+            !line.contains('flutter pub get');
+      }).map(lineParser).toList();
   expect(errors, unorderedEquals(expectedFailures));
 }
 

@@ -3852,9 +3852,9 @@ class Stack extends MultiChildRenderObjectWidget {
     if (alignment is AlignmentDirectional && textDirection == null) {
       assert(debugCheckHasDirectionality(
         context,
-        why: 'to resolve the \'alignment\' argument',
-        hint: alignment == AlignmentDirectional.topStart ? 'The default value for \'alignment\' is AlignmentDirectional.topStart, which requires a text direction.' : null,
-        alternative: 'Instead of providing a Directionality widget, another solution would be passing a non-directional \'alignment\', or an explicit \'textDirection\', to the $runtimeType.',
+        why: "to resolve the 'alignment' argument",
+        hint: alignment == AlignmentDirectional.topStart ? "The default value for 'alignment' is AlignmentDirectional.topStart, which requires a text direction." : null,
+        alternative: "Instead of providing a Directionality widget, another solution would be passing a non-directional 'alignment', or an explicit 'textDirection', to the $runtimeType.",
       ));
     }
     return true;
@@ -6165,7 +6165,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// See also:
 ///
 ///  * [AssetBundle], the interface for asset bundles.
-///  * [rootBundle], the default default asset bundle.
+///  * [rootBundle], the default asset bundle.
 class DefaultAssetBundle extends InheritedWidget {
   /// Creates a widget that determines the default asset bundle for its descendants.
   ///

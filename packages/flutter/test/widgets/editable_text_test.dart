@@ -6849,7 +6849,7 @@ void main() {
         defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.fuchsia
       ) {
-        // `newValue` will will not be truncated on couple platforms.
+        // `newValue` will not be truncated on couple platforms.
         expect(state.currentTextEditingValue.text, '你好啊朋友们');
         expect(state.currentTextEditingValue.composing, const TextRange(start: 3, end: 6));
       } else {
@@ -6869,7 +6869,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/68086.
-    testWidgets('composing range removed if it\'s overflowed the truncated value\'s length', (WidgetTester tester) async {
+    testWidgets("composing range removed if it's overflowed the truncated value's length", (WidgetTester tester) async {
       await setupWidget(
         tester,
         LengthLimitingTextInputFormatter(
@@ -6929,7 +6929,7 @@ void main() {
       }
     });
 
-    testWidgets('composing range handled correctly when it\'s overflowed', (WidgetTester tester) async {
+    testWidgets("composing range handled correctly when it's overflowed", (WidgetTester tester) async {
       const String string = '👨‍👩‍👦0123456';
 
       await setupWidget(tester, LengthLimitingTextInputFormatter(maxLength));
