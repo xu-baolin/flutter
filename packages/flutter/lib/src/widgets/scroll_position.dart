@@ -915,6 +915,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }
 
   /// Dispatches a notification that the contents metrics has changed.
+  ///
+  /// This notification is dispatched when the dimensions of the contents have
+  /// changed. For example, the size of the child changed or new children were
+  /// load when scrolling a long list.
   void didUpdateScrollContentMetrics() {
     ScrollContentMetricsNotification(metrics: copyWith(), context: context.notificationContext!).dispatch(context.notificationContext);
   }
