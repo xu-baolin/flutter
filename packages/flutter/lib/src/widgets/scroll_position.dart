@@ -552,8 +552,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
     if (_isContentMetricsChanged()) {
       didUpdateScrollContentMetrics();
+      _lastMetrics = copyWith();
     }
-    _lastMetrics = copyWith();
     return true;
   }
 
