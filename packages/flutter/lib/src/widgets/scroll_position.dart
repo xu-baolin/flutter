@@ -1,6 +1,7 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -509,7 +510,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollMetrics? _lastMetrics;
   Axis? _lastAxis;
 
-  bool _isContentMetricsChanged() {
+  bool _isMetricsChanged() {
     assert(haveDimensions);
     final ScrollMetrics currentMetrics = copyWith();
 
@@ -550,8 +551,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     }
     assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
 
-    if (_isContentMetricsChanged()) {
-      didUpdateScrollContentMetrics();
+    print('call me.');
+    if (_isMetricsChanged()) {
+      // It isn't safe to trigger the ScrollMetricsNotification if we are in
+      // the middle of rendering the frame, the developer is likely to schedule
+      // a new frame(build scheduled during frame is illegal).
+      scheduleMicrotask(didUpdateScrollMetrics);
       _lastMetrics = copyWith();
     }
     return true;
@@ -914,13 +919,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     UserScrollNotification(metrics: copyWith(), context: context.notificationContext!, direction: direction).dispatch(context.notificationContext);
   }
 
-  /// Dispatches a notification that the contents metrics has changed.
-  ///
-  /// This notification is dispatched when the dimensions of the contents have
-  /// changed. For example, the size of the child changed or new children were
-  /// load when scrolling a long list.
-  void didUpdateScrollContentMetrics() {
-    ScrollContentMetricsNotification(metrics: copyWith(), context: context.notificationContext!).dispatch(context.notificationContext);
+  /// Dispatches a notification that the [ScrollMetrics] has changed.
+  void didUpdateScrollMetrics() {
+    assert(SchedulerBinding.instance!.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    if (context.notificationContext != null)
+      ScrollMetricsNotification(metrics: copyWith(), context: context.notificationContext!).dispatch(context.notificationContext);
   }
 
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
@@ -968,21 +971,90 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }
 }
 
-/// A notification that a [Scrollable] widget's contents metrics has changed.
-class ScrollContentMetricsNotification extends LayoutChangedNotification with ViewportNotificationMixin {
-  /// Creates a notification that the [Scrollable] widget's contents metrics has changed.
-  ScrollContentMetricsNotification({
+/// A notification that a scrollable widget's [ScrollMetrics] has changed.
+///
+/// For example, when the content of a scrollable is altered, making it larger
+/// or smaller, this notification will be dispatched. Similarly, if the size
+/// of the window or parent changes, the scrollable can notify of these
+/// changes in dimensions.
+///
+/// The above behaviors usually do not trigger [ScrollNotification] events,
+/// so this is useful for listening to [ScrollMetrics] changes that are not
+/// caused by the user scrolls.
+///
+/// {@tool dartpad --template=freeform}
+/// This sample shows that the [ScrollMetricsNotification] dispatched when the
+/// window size changed. Press the floating action button to increase the
+/// scrollable window's size.
+///
+/// ```dart main
+/// import 'package:flutter/material.dart';
+///
+/// void main() => runApp(ScrollMetricsDemo());
+///
+/// class ScrollMetricsDemo extends StatefulWidget {
+///   @override
+///   State<ScrollMetricsDemo> createState() => ScrollMetricsDemoState();
+/// }
+///
+/// class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
+///   double windowSize = 200.0;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('ScrollMetrics Demo'),
+///         ),
+///         floatingActionButton: FloatingActionButton(
+///           child: const Icon(Icons.add),
+///           onPressed: () => setState(() {
+///             windowSize += 10.0;
+///           }),
+///         ),
+///         body: NotificationListener<ScrollMetricsNotification>(
+///           onNotification: (ScrollMetricsNotification notification) {
+///             ScaffoldMessenger.of(notification.context).showSnackBar(
+///               SnackBar(
+///                 content: const Text('Scroll metrics changed!'),
+///               ),
+///             );
+///             return false;
+///           },
+///           child: Scrollbar(
+///             isAlwaysShown: true,
+///             child: SizedBox(
+///               height: windowSize,
+///               width: double.infinity,
+///               child: SingleChildScrollView(
+///                 child: FlutterLogo(
+///                   size: 300.0,
+///                 ),
+///               ),
+///             ),
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+class ScrollMetricsNotification extends LayoutChangedNotification with ViewportNotificationMixin {
+  /// Creates a notification that the scrollable widget's [ScrollMetrics] has
+  /// changed.
+  ScrollMetricsNotification({
     required this.metrics,
     required this.context,
   });
 
-  /// Description of a [Scrollable]'s contents.
+  /// Description of a scrollable widget's [ScrollMetrics].
   final ScrollMetrics metrics;
 
   /// The build context of the widget that fired this notification.
   ///
-  /// This can be used to find the scrollable's render objects to determine the
-  /// size of the viewport, for instance.
+  /// This can be used to find the scrollable widget's render objects to
+  /// determine the size of the viewport, for instance.
   final BuildContext context;
 
   @override

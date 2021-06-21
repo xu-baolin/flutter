@@ -1328,7 +1328,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     );
   }
 
-  bool _handleScrollContentMetricsNotification(ScrollContentMetricsNotification notification) {
+  bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
     if (!widget.notificationPredicate(ScrollUpdateNotification(metrics: notification.metrics, context: notification.context)))
       return false;
     if (showScrollbar) {
@@ -1491,8 +1491,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Widget build(BuildContext context) {
     updateScrollbarPainter();
 
-    return NotificationListener<ScrollContentMetricsNotification>(
-      onNotification: _handleScrollContentMetricsNotification,
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: _handleScrollMetricsNotification,
       child: NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
         child: RepaintBoundary(

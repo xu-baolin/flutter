@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ScrollContentMetricsNotification test', (WidgetTester tester) async {
+  testWidgets('ScrollMetricsNotification test', (WidgetTester tester) async {
     final List<LayoutChangedNotification> events = <LayoutChangedNotification>[];
     Widget buildFrame(double height) {
       return NotificationListener<LayoutChangedNotification>(
@@ -23,7 +23,7 @@ void main() {
     await tester.pumpWidget(buildFrame(1200.0));
     // Initial metrics notification.
     expect(events.length, 1);
-    ScrollContentMetricsNotification event = events[0] as ScrollContentMetricsNotification;
+    ScrollMetricsNotification event = events[0] as ScrollMetricsNotification;
     expect(event.metrics.extentBefore, 0.0);
     expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 600.0);
@@ -32,7 +32,7 @@ void main() {
     await tester.pumpWidget(buildFrame(1000.0));
     // Change the content dimensions will trigger a new event.
     expect(events.length, 1);
-    event = events[0] as ScrollContentMetricsNotification;
+    event = events[0] as ScrollMetricsNotification;
     expect(event.metrics.extentBefore, 0.0);
     expect(event.metrics.extentInside, 600.0);
     expect(event.metrics.extentAfter, 400.0);
@@ -54,7 +54,7 @@ void main() {
     // Change the content dimensions again.
     await tester.pumpWidget(buildFrame(500.0));
     expect(events.length, 1);
-    event = events[0] as ScrollContentMetricsNotification;
+    event = events[0] as ScrollMetricsNotification;
     expect(event.metrics.extentBefore, 10.0);
     expect(event.metrics.extentInside, 590.0);
     expect(event.metrics.extentAfter, 0.0);
