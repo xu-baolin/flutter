@@ -551,7 +551,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     }
     assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
 
-    print('call me.');
     if (_isMetricsChanged()) {
       // It isn't safe to trigger the ScrollMetricsNotification if we are in
       // the middle of rendering the frame, the developer is likely to schedule
