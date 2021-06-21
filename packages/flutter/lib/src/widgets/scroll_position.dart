@@ -1040,6 +1040,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 class ScrollMetricsNotification extends LayoutChangedNotification with ViewportNotificationMixin {
   /// Creates a notification that the scrollable widget's [ScrollMetrics] has
   /// changed.
