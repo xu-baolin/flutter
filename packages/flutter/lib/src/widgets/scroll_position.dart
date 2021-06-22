@@ -990,9 +990,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 /// ```dart main
 /// import 'package:flutter/material.dart';
 ///
-/// void main() => runApp(ScrollMetricsDemo());
+/// void main() => runApp(const ScrollMetricsDemo());
 ///
 /// class ScrollMetricsDemo extends StatefulWidget {
+///   const ScrollMetricsDemo({Key? key}) : super(key: key);
+///
 ///   @override
 ///   State<ScrollMetricsDemo> createState() => ScrollMetricsDemoState();
 /// }
@@ -1016,8 +1018,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 ///         body: NotificationListener<ScrollMetricsNotification>(
 ///           onNotification: (ScrollMetricsNotification notification) {
 ///             ScaffoldMessenger.of(notification.context).showSnackBar(
-///               SnackBar(
-///                 content: const Text('Scroll metrics changed!'),
+///               const SnackBar(
+///                 content: Text('Scroll metrics changed!'),
 ///               ),
 ///             );
 ///             return false;
@@ -1027,7 +1029,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 ///             child: SizedBox(
 ///               height: windowSize,
 ///               width: double.infinity,
-///               child: SingleChildScrollView(
+///               child: const SingleChildScrollView(
 ///                 child: FlutterLogo(
 ///                   size: 300.0,
 ///                 ),
